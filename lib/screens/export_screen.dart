@@ -40,6 +40,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         includeCharts: charts,
         language: store.languageCode,
         currencyCode: store.currencyCode,
+        selectedMonth: ref.read(appStoreProvider).selectedMonth,
       ),
       entries: List.of(store.entries),
       categoryNames: {
@@ -245,7 +246,9 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         child: Text(
                           categoryLabel(context, c),
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: categoryTextColor(context, c)),
+                          style: TextStyle(
+                            color: categoryTextColor(context, c),
+                          ),
                         ),
                       ),
                     ),
@@ -275,7 +278,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          Chip(label: Text(context.l10n.t('export_overview'))),
+                          Chip(
+                            label: Text(
+                              context.l10n.t('export_reference_sheets'),
+                            ),
+                          ),
                           ...(selectedYears.toList()..sort()).map(
                             (y) => Chip(label: Text('$y')),
                           ),
