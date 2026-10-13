@@ -1,5 +1,6 @@
 const income = 'income';
 const expense = 'expense';
+const investmentTransfer = 'investment';
 
 class Category {
   final int id;

@@ -1,6 +1,36 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Keep portfolios separate so earlier mobile/web clients can still sync finance.
+    match /users/{uid}/investments/{recordId} {
+      function owner() { return request.auth != null && request.auth.uid == uid; }
+      function valid() {
+        let d=request.resource.data;
+        return d.keys().hasOnly(['schema','table','data','deleted','token','updatedAt'])
+          && d.schema==1 && d.table in ['investments','investment_entries'] && d.deleted is bool && d.token is string
+          && d.updatedAt==request.time && d.data is map
+          && (d.deleted || (d.table=='investments' && d.data.keys().hasOnly(['name','invested_minor','current_minor','currency_code','valued_at','note'])
+            && d.data.name is string && d.data.name.size()>0 && d.data.name.size()<=100
+            && d.data.invested_minor is int && d.data.invested_minor>=0 && d.data.invested_minor<=99999999999999
+            && d.data.current_minor is int && d.data.current_minor>=0 && d.data.current_minor<=99999999999999
+            && d.data.currency_code in ['THB','USD','EUR','GBP','JPY','CNY','SGD']
+            && d.data.valued_at is string && d.data.note is string && d.data.note.size()<=2000)
+          || (d.table=='investment_entries'
+            && d.data.keys().hasOnly(['fund_id','account_id','contribution_only','amount_minor','current_minor','transaction_date','created_at','note'])
+            && (!('contribution_only' in d.data) || (d.data.contribution_only is int && d.data.contribution_only in [0,1]))
+            && (!('account_id' in d.data) || (d.data.account_id is string && d.data.account_id.size()>0))
+            && d.data.fund_id is string && d.data.fund_id.size()>0
+            && d.data.amount_minor is int && d.data.amount_minor>0 && d.data.amount_minor<=99999999999999
+            && d.data.current_minor is int && d.data.current_minor>=0 && d.data.current_minor<=99999999999999
+            && d.data.transaction_date is string && d.data.created_at is int && d.data.created_at>=0
+            && d.data.note is string && d.data.note.size()<=2000));
+      }
+      allow read: if owner();
+      allow create: if owner() && valid();
+      allow update: if owner() && valid() && request.resource.data.table==resource.data.table
+        && (!resource.data.deleted || request.resource.data.deleted);
+      allow delete: if false;
+    }
     match /users/{uid}/finance/{recordId} {
       function owner() { return request.auth != null && request.auth.uid == uid; }
       function valid() {

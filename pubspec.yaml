@@ -1,7 +1,7 @@
 name: monthly_flow
 description: Offline monthly income and expense tracker.
 publish_to: none
-version: 1.6.11+9
+version: 1.7.0+10
 
 environment:
   sdk: '>=3.10.0 <4.0.0'

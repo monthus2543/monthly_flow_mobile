@@ -1,18 +1,51 @@
 const Map<String, String> th = {
+  'monthly_invested': 'เงินลงทุนเดือนนี้',  'fund_count': 'จำนวนกองทุน',  'delete_investment_entry_hint': 'ยอดเงินจะคืนในบัญชีที่ใช้ฝาก และลดเงินลงทุนสะสมของกองทุน',  'delete_investment_entry': 'ลบรายการลงทุน',  'edit_investment': 'แก้ไขการลงทุน',  'fund_has_deposits': 'กองทุนนี้มีรายการหักเงินจากบัญชีแล้ว จึงลบกองทุนไม่ได้',  'select_account': 'เลือกบัญชีที่ใช้ลงทุน',  'create_fund_first': 'เพิ่มกองทุนก่อน แล้วบันทึกเงินลงทุนด้วยปุ่ม +',
+  'investment_history': 'ประวัติการลงทุน',
+  'investment_date': 'วันที่ลงทุน',
+  'investment_amount': 'จำนวนเงินลงทุนเพิ่ม',
+  'add_investment': 'เพิ่มการลงทุน',
+  'select_fund': 'เลือกกองทุน',
+  'fund_name': 'ชื่อกองทุน / สินทรัพย์',
+  'edit_fund': 'แก้ไขกองทุน',
+  'add_fund': 'เพิ่มกองทุน',
+  'manage_portfolios': 'จัดการพอร์ต',
+  'portfolio_value': 'มูลค่าพอร์ต',
+  'edit_portfolio': 'แก้ไขพอร์ต',
+  'add_portfolio': 'เพิ่มพอร์ต',
+  'required_name': 'กรุณากรอกชื่อ',
+  'portfolio_name': 'ชื่อพอร์ต / สินทรัพย์',
+  'investment_invalid_amount': 'กรอกจำนวนตั้งแต่ 0 และทศนิยมไม่เกิน 2 ตำแหน่ง',
+  'investments': 'ลงทุน',
+  'no_portfolios': 'ยังไม่มีกองทุน กดเพิ่มกองทุนเพื่อเริ่มต้น',
+  'spending_mode': 'เงินใช้จ่าย',
+  'investment_gain': 'กำไร / ขาดทุน',
+  'portfolio_currency_hint':
+      'แสดงเฉพาะสกุลเงินที่เลือก เปลี่ยนสกุลเงินในตั้งค่าเพื่อดูพอร์ตสกุลอื่น ไม่มีการแปลงค่าเงิน',
+  'valued_at': 'วันที่ประเมิน',
+  'delete_portfolio': 'ลบพอร์ตนี้?',
+  'net_invested': 'เงินลงทุนสะสม',
+  'investment_manual_hint':
+      'เงินฝากลงทุนจะหักจากบัญชีที่เลือก และเพิ่มยอดลงทุนสะสม',
+
   'export_save_or_send': 'บันทึกหรือส่งไฟล์',
   "export_email": "อีเมลที่ Login",
   "export_email_note": "ส่งไฟล์ Excel อัตโนมัติไปยังอีเมลของบัญชีนี้",
   "export_send_email": "ส่งไปอีเมลที่ Login",
   "export_email_success": "ส่งรายงานไปอีเมลแล้ว",
   "export_email_sending": "กำลังส่งรายงานทางอีเมล",
-  "export_email_setup": "ยังไม่ได้ตั้งค่าบริการส่งอีเมล กรุณาบันทึกลงอุปกรณ์ก่อน",
+  "export_email_setup":
+      "ยังไม่ได้ตั้งค่าบริการส่งอีเมล กรุณาบันทึกลงอุปกรณ์ก่อน",
   "export_email_failed": "ส่งอีเมลไม่สำเร็จ กรุณาลองใหม่หรือบันทึกลงอุปกรณ์",
-  "export_email_pending": "ยังยืนยันผลการส่งไม่ได้ กดลองอีกครั้งเพื่อตรวจสถานะ หรือบันทึกลงอุปกรณ์",
+  "export_email_pending":
+      "ยังยืนยันผลการส่งไม่ได้ กดลองอีกครั้งเพื่อตรวจสถานะ หรือบันทึกลงอุปกรณ์",
   "export_email_limit": "ส่งรายงานบ่อยเกินไป กรุณารอสักครู่หรือบันทึกลงอุปกรณ์",
-  "export_email_too_large": "ไฟล์ใหญ่เกิน 5 MB สำหรับอีเมล กรุณาลดจำนวนปีหรือบันทึกลงอุปกรณ์",
-  "export_email_verified_required": "บัญชีนี้ต้องมีอีเมลที่ยืนยันแล้วเพื่อส่งรายงาน",
+  "export_email_too_large":
+      "ไฟล์ใหญ่เกิน 5 MB สำหรับอีเมล กรุณาลดจำนวนปีหรือบันทึกลงอุปกรณ์",
+  "export_email_verified_required":
+      "บัญชีนี้ต้องมีอีเมลที่ยืนยันแล้วเพื่อส่งรายงาน",
   "export_excel": "ส่งออกข้อมูล",
-  "export_subtitle": "เลือกปีที่ต้องการส่งออก\nแต่ละปีจะอยู่คนละชีตในไฟล์เดียวกัน",
+  "export_subtitle":
+      "เลือกปีที่ต้องการส่งออก\nแต่ละปีจะอยู่คนละชีตในไฟล์เดียวกัน",
   "export_years": "ปีที่ต้องการ",
   "export_all_years": "เลือกทุกปี",
   "export_all": "ทั้งหมด",
@@ -20,10 +53,12 @@ const Map<String, String> th = {
   "export_destination": "บันทึกไฟล์ที่",
   "export_device": "ในอุปกรณ์",
   "export_google_required": "เชื่อมต่อ Google ในตั้งค่าเพื่อส่งออกไป Drive",
-  "export_drive_note": "บันทึกใน Monthly Flow/Reports · ขอสิทธิ์ Drive เมื่อส่งออก",
+  "export_drive_note":
+      "บันทึกใน Monthly Flow/Reports · ขอสิทธิ์ Drive เมื่อส่งออก",
   "export_sheets": "ตัวอย่างชีต",
   "export_overview": "ภาพรวม",
-  "export_contents": "รายรับ–รายจ่ายวางคู่กัน · เลือกเดือนใน Excel · ช่องลงทุนกรอกเอง · ไม่มี ID",
+  "export_contents":
+      "รายรับ–รายจ่ายวางคู่กัน · เลือกเดือนใน Excel · ช่องลงทุนกรอกเอง · ไม่มี ID",
   "export_reference_sheets": "รายปี · สรุปเดือน · ลงทุน · ข้อมูล",
   "export_preview": "ดูตัวอย่างรายงาน",
   "export_create": "สร้างไฟล์ Excel",
@@ -43,13 +78,17 @@ const Map<String, String> th = {
   "export_saving": "กำลังบันทึกไฟล์",
   "export_failed": "สร้างไฟล์ไม่สำเร็จ กรุณาลองอีกครั้ง",
   "export_save_failed": "บันทึกไฟล์ไม่สำเร็จ ไฟล์ยังพร้อมให้ลองใหม่",
-  "export_upload_failed": "ส่งไป Drive ไม่สำเร็จ ลองส่งไฟล์เดิมอีกครั้งหรือบันทึกลงอุปกรณ์",
+  "export_upload_failed":
+      "ส่งไป Drive ไม่สำเร็จ ลองส่งไฟล์เดิมอีกครั้งหรือบันทึกลงอุปกรณ์",
   "export_wrong_account": "กรุณาเลือกบัญชี Google เดียวกับที่เข้าสู่ระบบ",
   "export_account_changed": "บัญชีเปลี่ยนแล้ว กรุณาสร้างรายงานใหม่",
   "export_permission_expired": "สิทธิ์ Drive หมดอายุ กรุณาเชื่อมต่ออีกครั้ง",
-  "export_permission_denied": "ยังไม่มีสิทธิ์ส่งไฟล์ไป Drive กรุณาตรวจสิทธิ์แล้วลองใหม่",
-  "export_drive_full": "พื้นที่ Google Drive เต็ม กรุณาเพิ่มพื้นที่หรือบันทึกลงอุปกรณ์",
-  "export_drive_setup": "ยังไม่ได้เปิด Google Drive API กรุณาตั้งค่าโปรเจกต์ก่อน",
+  "export_permission_denied":
+      "ยังไม่มีสิทธิ์ส่งไฟล์ไป Drive กรุณาตรวจสิทธิ์แล้วลองใหม่",
+  "export_drive_full":
+      "พื้นที่ Google Drive เต็ม กรุณาเพิ่มพื้นที่หรือบันทึกลงอุปกรณ์",
+  "export_drive_setup":
+      "ยังไม่ได้เปิด Google Drive API กรุณาตั้งค่าโปรเจกต์ก่อน",
   "export_open_failed": "เปิดไฟล์ไม่ได้ กรุณาลองอีกครั้ง",
   "export_net": "สุทธิ",
   "export_monthly": "สรุป 12 เดือน",
@@ -68,7 +107,8 @@ const Map<String, String> th = {
   "sync_now": "ซิงค์ตอนนี้",
   "sync_last": "ซิงค์ล่าสุด",
   "sync_pending_count": "รายการที่รอส่ง",
-  "sync_account_note": "ข้อมูลการเงินและใบเสร็จที่อัปโหลดซิงค์กับบัญชี Google นี้ การตั้งค่าและ PIN เก็บเฉพาะเครื่อง",
+  "sync_account_note":
+      "ข้อมูลการเงินและใบเสร็จที่อัปโหลดซิงค์กับบัญชี Google นี้ การตั้งค่าและ PIN เก็บเฉพาะเครื่อง",
   "welcome_title": "ยินดีต้อนรับ",
   "welcome_subtitle": "เริ่มต้นใช้งาน Monthly Flow",
   "welcome_tagline": "จัดการเงินรายเดือนอย่างเรียบง่าย",
@@ -224,8 +264,10 @@ const Map<String, String> th = {
   'receipt_attach_failed': 'แนบรูปไม่ได้ กรุณาลองใหม่',
   'receipt_too_large': 'รูปใบเสร็จต้องไม่เกิน 5 MB',
   'receipt_format': 'กรุณาใช้รูปใบเสร็จ JPG, PNG หรือ WebP',
-  'receipt_upload_failed': 'อัปโหลดใบเสร็จไม่สำเร็จ รูปยังอยู่ในเครื่อง กรุณาลองบันทึกใหม่',
-  'receipt_storage_setup': 'ยังไม่พร้อมใช้งาน Firebase Storage กรุณาตรวจการตั้งค่าและสิทธิ์ใบเสร็จ',
+  'receipt_upload_failed':
+      'อัปโหลดใบเสร็จไม่สำเร็จ รูปยังอยู่ในเครื่อง กรุณาลองบันทึกใหม่',
+  'receipt_storage_setup':
+      'ยังไม่พร้อมใช้งาน Firebase Storage กรุณาตรวจการตั้งค่าและสิทธิ์ใบเสร็จ',
   'receipt_uploading': 'กำลังอัปโหลดใบเสร็จ',
   'receipt_attached': 'แนบใบเสร็จแล้ว',
   'manage_categories': 'จัดการหมวดหมู่',
@@ -265,8 +307,10 @@ const Map<String, String> th = {
   'profile_photo_too_large': 'รูปต้องมีขนาดไม่เกิน 5 MB',
   'profile_photo_format': 'กรุณาเลือกรูป JPG, PNG หรือ WebP',
   'profile_photo_pick_failed': 'เลือกรูปไม่สำเร็จ กรุณาลองใหม่',
-  'profile_photo_upload_failed': 'อัปโหลดรูปไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
-  'profile_storage_setup': 'ยังอัปโหลดรูปไม่ได้ กรุณาตรวจการตั้งค่า Firebase Storage',
+  'profile_photo_upload_failed':
+      'อัปโหลดรูปไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
+  'profile_storage_setup':
+      'ยังอัปโหลดรูปไม่ได้ กรุณาตรวจการตั้งค่า Firebase Storage',
   'offline_profile': 'บัญชีออฟไลน์',
   'connect_google': 'เชื่อมต่อบัญชี Google',
   'welcome_or_google': 'หรือเข้าสู่ระบบด้วย Google',
@@ -275,7 +319,8 @@ const Map<String, String> th = {
   'profile_photo_url': 'ลิงก์รูปโปรไฟล์ (ไม่บังคับ)',
   'profile_photo_hint': 'ใช้ลิงก์รูปภาพ HTTPS เว้นว่างเพื่อลบรูปโปรไฟล์',
   'profile_photo_invalid': 'กรุณากรอกลิงก์รูปภาพ HTTPS ที่ถูกต้อง',
-  'profile_google_note': 'เปลี่ยนเฉพาะโปรไฟล์ใน Monthly Flow ไม่เปลี่ยนบัญชี Google และอีเมล',
+  'profile_google_note':
+      'เปลี่ยนเฉพาะโปรไฟล์ใน Monthly Flow ไม่เปลี่ยนบัญชี Google และอีเมล',
   'save_profile': 'บันทึกโปรไฟล์',
   'profile_saved': 'บันทึกโปรไฟล์แล้ว',
 };

@@ -1,3 +1,5 @@
+import '../models/investment.dart';
+import '../models/investment_entry.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app_state.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
@@ -17,7 +19,10 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return database;
 });
 
-final accountDatabaseProvider = Provider.family<AppDatabase, String>((ref, uid) {
+final accountDatabaseProvider = Provider.family<AppDatabase, String>((
+  ref,
+  uid,
+) {
   final database = AppDatabase(accountId: uid);
   ref.onDispose(database.close);
   return database;
@@ -28,13 +33,20 @@ class FinanceChanges extends Notifier<int> {
   int build() => 0;
   void changed() => state++;
 }
-final financeChangesProvider = NotifierProvider<FinanceChanges, int>(FinanceChanges.new);
+
+final financeChangesProvider = NotifierProvider<FinanceChanges, int>(
+  FinanceChanges.new,
+);
 
 final appStoreProvider = NotifierProvider<AppStore, AppState>(AppStore.new);
 
 final appStartupProvider = FutureProvider<void>((ref) async {
   String? uid;
-  try { uid = await ref.watch(authSessionProvider.selectAsync((account) => account?.id)); } catch (_) {
+  try {
+    uid = await ref.watch(
+      authSessionProvider.selectAsync((account) => account?.id),
+    );
+  } catch (_) {
     // Missing account services must not prevent using the local profile.
   }
   if (!ref.mounted) return;
@@ -52,6 +64,38 @@ class AppStore extends Notifier<AppState> {
   AppState build() {
     database = ref.read(appDatabaseProvider);
     return AppState();
+  }
+
+  List<Investment> get investments => state.investments;
+  List<InvestmentEntry> get investmentEntries => state.investmentEntries;
+  Future<void> saveFund(Investment value) async {
+    final generation = _openGeneration;
+    await _repository!.saveFund(value);
+    if (ref.mounted && generation == _openGeneration) await refresh();
+  }
+
+  Future<void> addInvestmentEntry(InvestmentEntry value) async {
+    final generation = _openGeneration;
+    await _repository!.addInvestmentEntry(value);
+    if (ref.mounted && generation == _openGeneration) await refresh();
+  }
+
+  Future<void> deleteInvestmentEntry(int id) async {
+    final generation = _openGeneration;
+    await _repository!.deleteInvestmentEntry(id);
+    if (ref.mounted && generation == _openGeneration) await refresh();
+  }
+
+  Future<void> saveInvestment(Investment value) async {
+    final generation = _openGeneration;
+    await _repository!.saveInvestment(value);
+    if (ref.mounted && generation == _openGeneration) await refresh();
+  }
+
+  Future<void> deleteInvestment(int id) async {
+    final generation = _openGeneration;
+    await _repository!.deleteInvestment(id);
+    if (ref.mounted && generation == _openGeneration) await refresh();
   }
 
   List<Entry> get entries => state.entries;
@@ -74,9 +118,12 @@ class AppStore extends Notifier<AppState> {
     final generation = ++_openGeneration;
     final guest = ref.read(appDatabaseProvider);
     final guestDb = await guest.open();
-    final target = accountId == null ? guest : ref.read(accountDatabaseProvider(accountId));
+    final target = accountId == null
+        ? guest
+        : ref.read(accountDatabaseProvider(accountId));
     final financeDb = accountId == null ? guestDb : await target.open();
-    if (accountId != null) await SyncLocal.importGuest(guestDb, financeDb, accountId);
+    if (accountId != null)
+      await SyncLocal.importGuest(guestDb, financeDb, accountId);
     if (!ref.mounted || generation != _openGeneration) return;
     database = target;
     activeAccountId = accountId;
@@ -94,14 +141,16 @@ class AppStore extends Notifier<AppState> {
           ? values['theme_color']!
           : 'teal',
       currencyCode: currencySymbols.containsKey(values['currency_code'])
-          ? values['currency_code']! : 'THB',
+          ? values['currency_code']!
+          : 'THB',
       hideBalances: values['hide_balances'] == '1',
       remindersEnabled: values['reminders_enabled'] != '0',
       pinHash: values['pin_hash'] ?? '',
       onboardingCompleted: values['onboarding_completed'] == '1',
       localName: values['local_name'] ?? '',
-      selectedMonth:
-          parsed == null ? selectedMonth : DateTime(parsed.year, parsed.month),
+      selectedMonth: parsed == null
+          ? selectedMonth
+          : DateTime(parsed.year, parsed.month),
     );
     await refresh();
     if (!ref.mounted || generation != _openGeneration) return;
@@ -121,15 +170,19 @@ class AppStore extends Notifier<AppState> {
 
   /// Only the first connection adopts the profile created offline.
   Future<String?> localProfileNameForLink() async {
-    if (!state.onboardingCompleted || state.localName.trim().isEmpty) return null;
+    if (!state.onboardingCompleted || state.localName.trim().isEmpty)
+      return null;
     final settings = await _deviceRepository!.settings();
-    return settings['google_profile_linked'] == '1' ? null : state.localName.trim();
+    return settings['google_profile_linked'] == '1'
+        ? null
+        : state.localName.trim();
   }
 
   Future<void> completeLocalProfileLink() =>
       _deviceRepository!.setting('google_profile_linked', '1');
 
-  Future<void> catchUpRecurring() => _generateAutomaticRecurringThrough(DateTime.now());
+  Future<void> catchUpRecurring() =>
+      _generateAutomaticRecurringThrough(DateTime.now());
 
   Future<void> refresh({bool notifySync = true}) async {
     final generation = _openGeneration;
@@ -141,6 +194,8 @@ class AppStore extends Notifier<AppState> {
       _repository!.recurringRules(),
       _repository!.savingGoals(),
       _repository!.billReminders(),
+      _repository!.investments(),
+      _repository!.investmentEntries(),
     ]);
     if (!ref.mounted) return;
     if (generation != _openGeneration) return;
@@ -152,6 +207,8 @@ class AppStore extends Notifier<AppState> {
       recurringRules: values[4] as List<RecurringRule>,
       savingGoals: values[5] as List<SavingGoal>,
       billReminders: values[6] as List<BillReminder>,
+      investments: values[7] as List<Investment>,
+      investmentEntries: values[8] as List<InvestmentEntry>,
     );
     if (notifySync) ref.read(financeChangesProvider.notifier).changed();
   }
@@ -160,6 +217,22 @@ class AppStore extends Notifier<AppState> {
       entries.where((e) => sameMonth(e.date, selectedMonth)).toList();
   int get monthlyIncome => sumType(monthlyEntries, income);
   int get monthlyExpense => sumType(monthlyEntries, expense);
+  int get monthlyInvestment => sumType(monthlyEntries, investmentTransfer);
+  int get investmentFundCount =>
+      investments.where((f) => f.currencyCode == currencyCode).length;
+  int get selectedMonthInvested {
+    final funds = investments
+        .where((f) => f.currencyCode == currencyCode)
+        .map((f) => f.id)
+        .toSet();
+    return investmentEntries
+        .where(
+          (e) => funds.contains(e.fundId) && sameMonth(e.date, selectedMonth),
+        )
+        .fold<int>(0, (sum, e) => sum + e.amountMinor);
+  }
+
+  int get monthlyBalance => monthlyIncome - monthlyExpense - monthlyInvestment;
   String get selectedMonthKey =>
       '${selectedMonth.year.toString().padLeft(4, '0')}-${selectedMonth.month.toString().padLeft(2, '0')}';
   List<Budget> get monthlyBudgets =>
@@ -183,12 +256,22 @@ class AppStore extends Notifier<AppState> {
 
   int accountBalance(Account account) =>
       account.openingBalanceMinor +
-      entries.where((e) => e.accountId == account.id).fold(
+      entries
+          .where((e) => e.accountId == account.id)
+          .fold(
             0,
             (sum, e) =>
                 sum + (e.type == income ? e.amountMinor : -e.amountMinor),
           );
   Category? categoryFor(int id) {
+    if (id == -1)
+      return const Category(
+        -1,
+        'investments',
+        investmentTransfer,
+        'investment',
+        colorValue: 0xFFF2B300,
+      );
     for (final category in categories) {
       if (category.id == id) return category;
     }
@@ -272,8 +355,9 @@ class AppStore extends Notifier<AppState> {
       sha256.convert(utf8.encode(value)).toString() == pinHash;
 
   Future<void> setPin(String value) async {
-    final next =
-        value.isEmpty ? '' : sha256.convert(utf8.encode(value)).toString();
+    final next = value.isEmpty
+        ? ''
+        : sha256.convert(utf8.encode(value)).toString();
     await _deviceRepository!.setting('pin_hash', next);
     if (ref.mounted) state = state.copyWith(pinHash: next);
   }
@@ -368,7 +452,7 @@ class AppStore extends Notifier<AppState> {
         createdAt: now,
       );
       await repository.recordRecurringOccurrence(rule, entry, key);
-        if (!ref.mounted || generation != _openGeneration) return;
+      if (!ref.mounted || generation != _openGeneration) return;
     }
     await refresh();
   }
@@ -507,6 +591,8 @@ class AppStore extends Notifier<AppState> {
       'recurring_rules',
       'saving_goals',
       'bill_reminders',
+      'investments',
+      'investment_entries',
       'settings',
     ];
     final payload = <String, Object?>{
@@ -515,7 +601,10 @@ class AppStore extends Notifier<AppState> {
       'created_at': DateTime.now().toIso8601String(),
     };
     for (final table in tables) {
-      payload[table] = await (table == 'settings' ? _deviceRepository! : repository).table(table);
+      payload[table] =
+          await (table == 'settings' ? _deviceRepository! : repository).table(
+            table,
+          );
     }
     return const JsonEncoder.withIndent('  ').convert(payload);
   }
@@ -533,6 +622,8 @@ class AppStore extends Notifier<AppState> {
       'recurring_rules',
       'saving_goals',
       'bill_reminders',
+      'investments',
+      'investment_entries',
       'settings',
     ];
     final backup = <String, List<Map<String, Object?>>>{};
@@ -544,7 +635,10 @@ class AppStore extends Notifier<AppState> {
     await _repository!.replaceBackup(backup);
     if (activeAccountId != null) {
       for (final setting in backup['settings'] ?? <Map<String, Object?>>[]) {
-        await _deviceRepository!.setting(setting['key'] as String, setting['value'] as String);
+        await _deviceRepository!.setting(
+          setting['key'] as String,
+          setting['value'] as String,
+        );
       }
     }
     await open(accountId: activeAccountId);

@@ -144,8 +144,11 @@ class SyncCoordinator extends Notifier<SyncState> {
     _again = false;
     final lastSync = state.lastSync;
     try {
-      state = SyncState(SyncPhase.syncing,
-          pending: state.pending, lastSync: lastSync);
+      state = SyncState(
+        SyncPhase.syncing,
+        pending: state.pending,
+        lastSync: lastSync,
+      );
       final local = SyncLocal(await store.database.open());
       if (!current()) return;
       state = SyncState(

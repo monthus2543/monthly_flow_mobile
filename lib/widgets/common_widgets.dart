@@ -72,7 +72,9 @@ LinearGradient appBackgroundGradient(BuildContext context) {
 
 String money(BuildContext context, int minor) => NumberFormat.currency(
   locale: Localizations.localeOf(context).toLanguageTag(),
-  symbol: (Theme.of(context).extension<AppCurrency>() ?? const AppCurrency('THB')).symbol,
+  symbol:
+      (Theme.of(context).extension<AppCurrency>() ?? const AppCurrency('THB'))
+          .symbol,
   decimalDigits: 2,
 ).format(minor / 100);
 
@@ -85,6 +87,8 @@ String dateLabel(BuildContext context, DateTime date) => DateFormat.yMMMd(
 ).format(date);
 
 String categoryLabel(BuildContext context, Category? category) {
+  if (category?.type == investmentTransfer)
+    return context.l10n.t('investments');
   if (category == null) return context.l10n.category('other');
   const legacy = <String, String>{
     'เงินเดือน': 'salary',
@@ -387,29 +391,42 @@ class TransactionTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(appStoreProvider);
     final store = ref.read(appStoreProvider.notifier);
+    final isInvestment = entry.type == investmentTransfer;
+    final fundingAccount = store.accounts
+        .where((a) => a.id == entry.accountId)
+        .firstOrNull;
+    final accountName = fundingAccount?.name == 'cash'
+        ? context.l10n.t('cash')
+        : fundingAccount?.name;
+    final amountColor = isInvestment
+        ? AppColors.investment
+        : entry.type == income
+        ? brandGreen
+        : expenseRed;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
-        backgroundColor: entry.type == income
+        backgroundColor: isInvestment
+            ? AppColors.investment.withValues(alpha: .15)
+            : entry.type == income
             ? AppColors.incomeContainer
             : AppColors.expenseContainer,
         child: Icon(
-          entry.type == income
+          isInvestment
+              ? Icons.account_balance_outlined
+              : entry.type == income
               ? LucideIcons.arrowDownLeft
               : LucideIcons.arrowUpRight,
-          color: entry.type == income ? brandGreen : expenseRed,
+          color: amountColor,
         ),
       ),
       title: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
       subtitle: Text(
-        '${categoryLabel(context, store.categoryFor(entry.categoryId))} · ${dateLabel(context, entry.date)}',
+        '${categoryLabel(context, store.categoryFor(entry.categoryId))}${isInvestment && accountName != null ? ' · $accountName' : ''} · ${dateLabel(context, entry.date)}',
       ),
       trailing: Text(
         '${entry.type == income ? '+' : '−'}${money(context, entry.amountMinor)}',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: entry.type == income ? brandGreen : expenseRed,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w600, color: amountColor),
       ),
       onTap: onTap,
       onLongPress: onDuplicate,

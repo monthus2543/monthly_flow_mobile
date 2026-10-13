@@ -36,7 +36,9 @@ Future<void> initializeSyncSchema(DatabaseExecutor db) async {
       final pristine = table == 'accounts'
           ? row['name'] == 'cash' && row['opening_balance_minor'] == 0
           : table == 'categories' && id <= 8
-          ? row['name'] == defaults[id - 1] && row['is_active'] == 1 && row['color_value'] == null
+          ? row['name'] == defaults[id - 1] &&
+                row['is_active'] == 1 &&
+                row['color_value'] == null
           : false;
       await db.insert('sync_records', {
         'entity_id': seed ? 'seed_${table}_$id' : newSyncId(),
@@ -100,6 +102,7 @@ class SyncLocal {
         for (final reference in {
           'category_id': 'categories',
           'account_id': 'accounts',
+          'fund_id': 'investments',
         }.entries) {
           if (data[reference.key] != null) {
             final mapping = await txn.query(
@@ -153,6 +156,41 @@ class SyncLocal {
       for (final remote in records) {
         if (!syncTables.contains(remote.table))
           throw const FormatException('Unknown cloud entity');
+        if (remote.table == 'investment_entries' && !remote.deleted) {
+          final parent = await txn.query(
+            'sync_records',
+            where: 'entity_id=? AND table_name=?',
+            whereArgs: [remote.data['fund_id'], 'investments'],
+          );
+          if (parent.isNotEmpty && parent.single['deleted'] == 1) {
+            // A contribution arriving after its fund was deleted must stay deleted.
+            final old = await txn.query(
+              'sync_records',
+              where: 'entity_id=?',
+              whereArgs: [remote.id],
+            );
+            if (old.isEmpty) {
+              final reserved = -(Sqflite.firstIntValue(
+                await txn.rawQuery(
+                  'SELECT COALESCE(MAX(ABS(local_id)),0)+1 FROM sync_records',
+                ),
+              )!);
+              await txn.insert('sync_records', {
+                'entity_id': remote.id,
+                'table_name': remote.table,
+                'local_id': reserved,
+                'deleted': 1,
+                'dirty': 1,
+              });
+            } else {
+              await txn.rawUpdate(
+                'UPDATE sync_records SET dirty=1, deleted=1, generation=generation+1 WHERE entity_id=? AND deleted=0',
+                [remote.id],
+              );
+            }
+            continue;
+          }
+        }
         final matches = await txn.query(
           'sync_records',
           where: 'entity_id=?',
@@ -166,6 +204,12 @@ class SyncLocal {
         var localId = mapping?['local_id'] as int?;
         if (remote.deleted) {
           if (localId != null) {
+            if (remote.table == 'investments') {
+              await txn.rawUpdate(
+                "UPDATE sync_records SET deleted=1,dirty=1,generation=generation+1 WHERE table_name='investment_entries' AND local_id IN (SELECT id FROM investment_entries WHERE fund_id=?)",
+                [localId],
+              );
+            }
             if (remote.table == 'categories' || remote.table == 'accounts') {
               await txn.update(
                 remote.table,
@@ -199,6 +243,7 @@ class SyncLocal {
           for (final reference in {
             'category_id': 'categories',
             'account_id': 'accounts',
+            'fund_id': 'investments',
           }.entries) {
             if (data[reference.key] != null) {
               final target = await txn.query(

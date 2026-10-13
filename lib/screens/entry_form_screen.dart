@@ -1,3 +1,4 @@
+import '../widgets/app_dropdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
@@ -128,7 +129,8 @@ class _EntryFormScreenState extends ConsumerState<EntryFormScreen> {
     setState(() => saving = true);
     try {
       final owner = store.activeAccountId;
-      if (receiptCloudEnabled && owner != null &&
+      if (receiptCloudEnabled &&
+          owner != null &&
           receiptPath.isNotEmpty &&
           !isCloudReceipt(receiptPath)) {
         final cloudPath = await ref
@@ -418,8 +420,11 @@ class _EntryFormScreenState extends ConsumerState<EntryFormScreen> {
                 ),
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  labelText: store.currencyCode == 'THB' ? context.l10n.t('amount')
-                      : context.l10n.t('amount_currency').replaceAll('{currency}', store.currencyCode),
+                  labelText: store.currencyCode == 'THB'
+                      ? context.l10n.t('amount')
+                      : context.l10n
+                            .t('amount_currency')
+                            .replaceAll('{currency}', store.currencyCode),
                   prefixIcon: const Icon(LucideIcons.walletCards),
                   suffixIcon: amount.text.isEmpty
                       ? null
@@ -451,7 +456,7 @@ class _EntryFormScreenState extends ConsumerState<EntryFormScreen> {
                     : null,
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<int>(
+              AppDropdownFormField<int>(
                 key: ValueKey(type),
                 initialValue: selected,
                 decoration: InputDecoration(
@@ -474,7 +479,7 @@ class _EntryFormScreenState extends ConsumerState<EntryFormScreen> {
                     value == null ? context.l10n.t('required_category') : null,
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<int>(
+              AppDropdownFormField<int>(
                 initialValue: accountId,
                 decoration: InputDecoration(
                   labelText: context.l10n.t('account'),

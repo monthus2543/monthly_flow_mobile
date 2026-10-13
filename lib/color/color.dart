@@ -27,6 +27,7 @@ abstract final class AppColors {
   static const errorDark = Color(0xFFFF8B80);
   static const categoryExpense = Color(0xFFD32F2F);
   static const categoryIncome = Color(0xFF007F65);
+  static const investment = Color(0xFFF2B300);
   static const error = Color(0xFFFF5F52);
   static const surfaceDark = Color(0xFF121212);
   static const surface = Color(0xFFFFFBF7);

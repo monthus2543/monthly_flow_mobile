@@ -1,18 +1,54 @@
 const Map<String, String> en = {
+  'monthly_invested': 'Investment this month',  'fund_count': 'Number of funds',  'delete_investment_entry_hint': 'This restores the funding account balance and reduces invested capital.',  'delete_investment_entry': 'Delete investment entry',  'edit_investment': 'Edit investment',  'fund_has_deposits': 'This fund has account debits and cannot be deleted.',  'select_account': 'Select a funding account',  'create_fund_first': 'Create a fund first, then use + to record investments.',
+  'investment_history': 'Investment history',
+  'investment_date': 'Investment date',
+  'investment_amount': 'Additional investment amount',
+  'add_investment': 'Add investment',
+  'select_fund': 'Select fund',
+  'fund_name': 'Fund / asset name',
+  'edit_fund': 'Edit fund',
+  'add_fund': 'Add fund',
+  'manage_portfolios': 'Manage portfolios',
+  'portfolio_value': 'Portfolio value',
+  'edit_portfolio': 'Edit portfolio',
+  'add_portfolio': 'Add portfolio',
+  'required_name': 'Enter a name',
+  'portfolio_name': 'Portfolio / asset name',
+  'investment_invalid_amount':
+      'Enter 0 or more, with at most 2 decimal places.',
+  'investments': 'Investments',
+  'no_portfolios': 'No funds yet. Add a fund to start.',
+  'spending_mode': 'Spending',
+  'investment_gain': 'Gain / loss',
+  'portfolio_currency_hint':
+      'Only the selected currency is shown. Change currency in settings to view other portfolios. No currency conversion is applied.',
+  'valued_at': 'Valuation date',
+  'delete_portfolio': 'Delete this portfolio?',
+  'net_invested': 'Net invested',
+  'investment_manual_hint':
+      'Contributions debit the selected account and increase invested capital.',
+
   'export_save_or_send': 'Save or send file',
   "export_email": "Account email",
-  "export_email_note": "Automatically sends the Excel attachment to this account’s email",
+  "export_email_note":
+      "Automatically sends the Excel attachment to this account’s email",
   "export_send_email": "Send to account email",
   "export_email_success": "Report sent by email",
   "export_email_sending": "Sending report by email",
-  "export_email_setup": "Email service is not configured yet. Save to your device instead.",
+  "export_email_setup":
+      "Email service is not configured yet. Save to your device instead.",
   "export_email_failed": "Could not send email. Retry or save to your device.",
-  "export_email_pending": "Sending is not confirmed yet. Retry to check status, or save to your device.",
-  "export_email_limit": "Too many email requests. Wait a while or save to your device.",
-  "export_email_too_large": "Email attachments are limited to 5 MB. Select fewer years or save to your device.",
-  "export_email_verified_required": "A verified account email is required to send reports.",
+  "export_email_pending":
+      "Sending is not confirmed yet. Retry to check status, or save to your device.",
+  "export_email_limit":
+      "Too many email requests. Wait a while or save to your device.",
+  "export_email_too_large":
+      "Email attachments are limited to 5 MB. Select fewer years or save to your device.",
+  "export_email_verified_required":
+      "A verified account email is required to send reports.",
   "export_excel": "Export data",
-  "export_subtitle": "Select years to export.\nEach year has its own sheet in one workbook.",
+  "export_subtitle":
+      "Select years to export.\nEach year has its own sheet in one workbook.",
   "export_years": "Years to export",
   "export_all_years": "Select all years",
   "export_all": "All",
@@ -20,10 +56,12 @@ const Map<String, String> en = {
   "export_destination": "Save to",
   "export_device": "Device",
   "export_google_required": "Connect Google in Settings to export to Drive",
-  "export_drive_note": "Saves to Monthly Flow/Reports · Drive permission is requested when exporting",
+  "export_drive_note":
+      "Saves to Monthly Flow/Reports · Drive permission is requested when exporting",
   "export_sheets": "Workbook sheets",
   "export_overview": "Overview",
-  "export_contents": "Income and expenses side by side · month selector · editable investments · no IDs",
+  "export_contents":
+      "Income and expenses side by side · month selector · editable investments · no IDs",
   "export_reference_sheets": "Annual · Monthly · Investments · Data",
   "export_preview": "Preview report",
   "export_create": "Create Excel file",
@@ -43,12 +81,15 @@ const Map<String, String> en = {
   "export_saving": "Saving file",
   "export_failed": "Could not create the file. Please try again.",
   "export_save_failed": "Could not save. Your file is ready to retry.",
-  "export_upload_failed": "Could not send to Drive. Retry the same file or save to your device.",
+  "export_upload_failed":
+      "Could not send to Drive. Retry the same file or save to your device.",
   "export_wrong_account": "Choose the same Google account used to sign in.",
   "export_account_changed": "Your account changed. Create a new report.",
   "export_permission_expired": "Drive permission expired. Please reconnect.",
-  "export_permission_denied": "Drive permission was not granted. Check permissions and retry.",
-  "export_drive_full": "Google Drive is full. Free space or save to your device.",
+  "export_permission_denied":
+      "Drive permission was not granted. Check permissions and retry.",
+  "export_drive_full":
+      "Google Drive is full. Free space or save to your device.",
   "export_drive_setup": "Enable the Google Drive API in your project first.",
   "export_open_failed": "Could not open the file. Please try again.",
   "export_net": "Net",
@@ -58,7 +99,8 @@ const Map<String, String> en = {
   "export_transactions": "All transactions",
   "export_rows": "transactions",
   "export_no_data": "No data",
-  "export_preview_limit": "Preview shows the first 30 transactions. Excel includes all transactions.",
+  "export_preview_limit":
+      "Preview shows the first 30 transactions. Excel includes all transactions.",
   "sync_local": "Data stays on this device",
   "sync_preparing": "Preparing account data",
   "sync_working": "Syncing data",
@@ -68,7 +110,8 @@ const Map<String, String> en = {
   "sync_now": "Sync now",
   "sync_last": "Last synced",
   "sync_pending_count": "Pending changes",
-  "sync_account_note": "Financial data and uploaded receipts sync with this Google account. Preferences and PIN stay on this device.",
+  "sync_account_note":
+      "Financial data and uploaded receipts sync with this Google account. Preferences and PIN stay on this device.",
   "welcome_title": "Welcome",
   "welcome_subtitle": "Get started with Monthly Flow",
   "welcome_tagline": "Manage your monthly money simply",
@@ -170,7 +213,8 @@ const Map<String, String> en = {
   'thai': 'ไทย',
   'english': 'English',
   'currency': 'Currency',
-  'currency_display_only': 'Changes the display unit without converting amounts.',
+  'currency_display_only':
+      'Changes the display unit without converting amounts.',
   'amount_currency': 'Amount ({currency})',
   'my_data': 'My data',
   'default_categories': 'Default categories',
@@ -226,8 +270,10 @@ const Map<String, String> en = {
   'receipt_attach_failed': 'Could not attach the image. Please try again.',
   'receipt_too_large': 'Receipt images must be no larger than 5 MB.',
   'receipt_format': 'Please use a JPG, PNG or WebP receipt image.',
-  'receipt_upload_failed': 'Receipt upload failed. The image is still on this device. Please save again.',
-  'receipt_storage_setup': 'Firebase Storage is not ready. Please check the receipt storage setup and permissions.',
+  'receipt_upload_failed':
+      'Receipt upload failed. The image is still on this device. Please save again.',
+  'receipt_storage_setup':
+      'Firebase Storage is not ready. Please check the receipt storage setup and permissions.',
   'receipt_uploading': 'Uploading receipt',
   'receipt_attached': 'Receipt attached',
   'manage_categories': 'Manage categories',
@@ -267,17 +313,21 @@ const Map<String, String> en = {
   'profile_photo_too_large': 'Choose a photo no larger than 5 MB.',
   'profile_photo_format': 'Choose a JPG, PNG or WebP photo.',
   'profile_photo_pick_failed': 'Could not select the photo. Please try again.',
-  'profile_photo_upload_failed': 'Photo upload failed. Check your connection and retry.',
-  'profile_storage_setup': 'Photo uploads are unavailable. Check Firebase Storage setup.',
+  'profile_photo_upload_failed':
+      'Photo upload failed. Check your connection and retry.',
+  'profile_storage_setup':
+      'Photo uploads are unavailable. Check Firebase Storage setup.',
   'offline_profile': 'Offline profile',
   'connect_google': 'Connect Google account',
   'welcome_or_google': 'Or sign in with Google',
   'edit_profile': 'Edit profile',
   'profile_name': 'Display name',
   'profile_photo_url': 'Profile image link (optional)',
-  'profile_photo_hint': 'Use an HTTPS image link. Leave blank to remove the photo.',
+  'profile_photo_hint':
+      'Use an HTTPS image link. Leave blank to remove the photo.',
   'profile_photo_invalid': 'Enter a valid HTTPS image link.',
-  'profile_google_note': 'Changes apply to Monthly Flow only. Your Google account and email stay the same.',
+  'profile_google_note':
+      'Changes apply to Monthly Flow only. Your Google account and email stay the same.',
   'save_profile': 'Save profile',
   'profile_saved': 'Profile updated',
 };

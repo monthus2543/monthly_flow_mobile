@@ -1,3 +1,4 @@
+import 'investment_entry_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../l10n/app_localizations.dart';
@@ -16,11 +17,16 @@ class HomeShell extends StatefulWidget {
 
 class _HomeShellState extends State<HomeShell> {
   int index = 0;
+  bool investmentMode = false;
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      DashboardScreen(onNavigate: _selectPage),
+      DashboardScreen(
+        onNavigate: _selectPage,
+        investmentMode: investmentMode,
+        onInvestmentModeChanged: (v) => setState(() => investmentMode = v),
+      ),
       TransactionsScreen(),
       StatisticsScreen(),
       SettingsScreen(),
@@ -30,7 +36,9 @@ class _HomeShellState extends State<HomeShell> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: appBackgroundGradient(context)),
-        child: SafeArea(child: IndexedStack(index: index, children: pages)),
+        child: SafeArea(
+          child: IndexedStack(index: index, children: pages),
+        ),
       ),
       extendBody: true,
       floatingActionButton: SizedBox.square(
@@ -50,41 +58,47 @@ class _HomeShellState extends State<HomeShell> {
         padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
         notchMargin: 8,
         shape: const CircularNotchedRectangle(),
-        child: Row(children: [
-          Expanded(
+        child: Row(
+          children: [
+            Expanded(
               child: _BottomNavItem(
-            icon: LucideIcons.house,
-            selectedIcon: LucideIcons.house600,
-            label: context.l10n.t('dashboard'),
-            selected: index == 0,
-            onTap: () => _selectPage(0),
-          )),
-          Expanded(
+                icon: LucideIcons.house,
+                selectedIcon: LucideIcons.house600,
+                label: context.l10n.t('dashboard'),
+                selected: index == 0,
+                onTap: () => _selectPage(0),
+              ),
+            ),
+            Expanded(
               child: _BottomNavItem(
-            icon: LucideIcons.receiptText,
-            selectedIcon: LucideIcons.receiptText600,
-            label: context.l10n.t('transactions'),
-            selected: index == 1,
-            onTap: () => _selectPage(1),
-          )),
-          const SizedBox(width: 68),
-          Expanded(
+                icon: LucideIcons.receiptText,
+                selectedIcon: LucideIcons.receiptText600,
+                label: context.l10n.t('transactions'),
+                selected: index == 1,
+                onTap: () => _selectPage(1),
+              ),
+            ),
+            const SizedBox(width: 68),
+            Expanded(
               child: _BottomNavItem(
-            icon: LucideIcons.chartNoAxesColumn,
-            selectedIcon: LucideIcons.chartNoAxesColumn600,
-            label: context.l10n.t('statistics'),
-            selected: index == 2,
-            onTap: () => _selectPage(2),
-          )),
-          Expanded(
+                icon: LucideIcons.chartNoAxesColumn,
+                selectedIcon: LucideIcons.chartNoAxesColumn600,
+                label: context.l10n.t('statistics'),
+                selected: index == 2,
+                onTap: () => _selectPage(2),
+              ),
+            ),
+            Expanded(
               child: _BottomNavItem(
-            icon: LucideIcons.settings,
-            selectedIcon: LucideIcons.settings600,
-            label: context.l10n.t('settings'),
-            selected: index == 3,
-            onTap: () => _selectPage(3),
-          )),
-        ]),
+                icon: LucideIcons.settings,
+                selectedIcon: LucideIcons.settings600,
+                label: context.l10n.t('settings'),
+                selected: index == 3,
+                onTap: () => _selectPage(3),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -115,7 +129,9 @@ class _HomeShellState extends State<HomeShell> {
               surfaceTintColor: theme.bottomSheetTheme.surfaceTintColor,
             ),
           ),
-          child: const EntryFormScreen(),
+          child: index == 0 && investmentMode
+              ? const InvestmentEntrySheet()
+              : const EntryFormScreen(),
         );
       },
     );
@@ -129,12 +145,13 @@ class _BottomNavItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _BottomNavItem(
-      {required this.icon,
-      required this.selectedIcon,
-      required this.label,
-      required this.selected,
-      required this.onTap});
+  const _BottomNavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -166,20 +183,23 @@ class _BottomNavItem extends StatelessWidget {
                 : const [],
           ),
           child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(selected ? selectedIcon : icon, color: color, size: 20),
-                const SizedBox(height: 1),
-                Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: color,
-                        fontSize: 10,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w500)),
-              ]),
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(selected ? selectedIcon : icon, color: color, size: 20),
+              const SizedBox(height: 1),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

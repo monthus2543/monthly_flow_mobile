@@ -160,11 +160,15 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
     s.freezePanes(rows: 17, columns: 3);
     final q = "'$yearName'";
     final incoming = y.entries.where((e) => e.type == income).toList(),
-        outgoing = y.entries.where((e) => e.type == expense).toList();
+        outgoing = y.entries.where((e) => e.type == expense).toList(),
+        deposits = y.entries
+            .where((e) => e.type == investmentTransfer)
+            .toList();
     final end = [
       117,
       17 + incoming.length,
       17 + outgoing.length,
+      17 + deposits.length,
     ].reduce((a, b) => a > b ? a : b);
     String range(String c) => '\$$c\$18:\$$c\$$end';
     final selected = data.options.selectedMonth?.year == y.year
@@ -199,7 +203,7 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
     cell(
       s,
       'Q3',
-      text(t('ออม/ลงทุนสุทธิประจำเดือน', 'Monthly net investments')),
+      text(t('เงินลงทุนเดือนนี้', 'Investment this month')),
       wrap: true,
     );
     s.merge(at('Q3'), at('Q4'));
@@ -210,11 +214,13 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
     }
 
     f(s, 'R3', net(period: '\$C\$1'), format: money);
+    cell(s, 'B7', text(t('จำนวนกองทุน', 'Number of funds')));
+    cell(s, 'C7', IntCellValue(data.fundCount));
     for (final item in [
       (3, t('รายรับรวม', 'Income'), 'F3'),
       (4, t('รายจ่ายรวม', 'Expenses'), 'L3'),
       (5, t('คงเหลือ', 'Balance'), 'C3-C4-C6'),
-      (6, t('ออม + ลงทุนสุทธิ', 'Net investments'), 'R3'),
+      (6, t('เงินลงทุนเดือนนี้', 'Investment this month'), 'R3'),
       (9, t('รายรับทั้งปี', 'Annual income'), 'Y30'),
       (10, t('รายจ่ายทั้งปี', 'Annual expenses'), 'Z30'),
       (11, t('เงินเก็บทั้งปี', 'Annual savings'), 'Y30-Z30-AA30'),
@@ -291,7 +297,7 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
               ).cellId,
               values[i],
               format: i == 0
-                  ? 'dd/mm/yyyy'
+                  ? 'dd/mm/yy'
                   : i == 2
                   ? money
                   : null,
@@ -315,13 +321,21 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
           null,
           fill: '#F5F0FA',
           format: c == 'P'
-              ? 'dd/mm/yyyy'
+              ? 'dd/mm/yy'
               : c == 'R'
               ? money
               : null,
         );
       f(s, 'U$r', 'IF(P$r="","",TEXT(P$r,"yyyy-mm"))');
       f(s, 'AF$r', 'IF(U$r=\$C\$1,COUNTIFS(\$U\$18:U$r,\$C\$1),"")');
+    }
+    for (var i = 0; i < deposits.length; i++) {
+      final deposit = deposits[i], r = i + 18;
+      cell(s, 'P$r', date(deposit.date), format: 'dd/mm/yy');
+      cell(s, 'Q$r', text(deposit.title));
+      cell(s, 'R$r', DoubleCellValue(deposit.amountMinor / 100), format: money);
+      cell(s, 'S$r', text(t('ซื้อ', 'Buy')));
+      cell(s, 'T$r', text(t('ลงทุน', 'Investment')));
     }
     s.setDataValidation(
       at('S18'),
@@ -474,7 +488,7 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
             ).cellId,
             'IFERROR(INDEX($q!${range(panel.$2[i])},MATCH(${r - 17},$q!${range(panel.$3)},0)),"")',
             format: i == 0
-                ? 'dd/mm/yyyy'
+                ? 'dd/mm/yy'
                 : i == 2
                 ? money
                 : null,
@@ -596,7 +610,11 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
       final values = <CellValue?>[
         date(e.date),
         text(
-          e.type == income ? t('รายรับ', 'Income') : t('รายจ่าย', 'Expenses'),
+          e.type == investmentTransfer
+              ? t('ลงทุน', 'Investment')
+              : e.type == income
+              ? t('รายรับ', 'Income')
+              : t('รายจ่าย', 'Expenses'),
         ),
         text(e.title),
         text(data.categoryNames[e.categoryId] ?? t('อื่น ๆ', 'Other')),
@@ -610,7 +628,7 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
           CellIndex.indexByColumnRow(columnIndex: c, rowIndex: i + 1).cellId,
           values[c],
           format: c == 0
-              ? 'dd/mm/yyyy'
+              ? 'dd/mm/yy'
               : c == 5
               ? money
               : null,
@@ -619,6 +637,171 @@ Uint8List buildReferenceExcelReport(ExcelReportData data) {
     raw.freezePanes(rows: 1);
     raw.setAutoFilter(at('A1'), at('G${y.entries.length + 1}'));
   }
+  if (data.investments.isNotEmpty) {
+    final sheet = base(t('พอร์ตกรอกเอง', 'Manual portfolios'), [
+      28,
+      14,
+      22,
+      22,
+      22,
+      18,
+      18,
+      35,
+    ]);
+    headers(sheet, 1, 0, [
+      t('ชื่อพอร์ต', 'Portfolio'),
+      t('สกุลเงิน', 'Currency'),
+      t('เงินลงทุนสะสม', 'Net invested'),
+      t('มูลค่าปัจจุบัน', 'Current value'),
+      t('กำไร / ขาดทุน', 'Gain / loss'),
+      t('ผลตอบแทน %', 'Return %'),
+      t('วันที่ประเมิน', 'Valuation date'),
+      t('หมายเหตุ', 'Note'),
+    ]);
+    final items = data.investments
+        .where((v) => data.options.years.contains(v.valuedAt.year))
+        .toList();
+    for (var i = 0; i < items.length; i++) {
+      final value = items[i], r = i + 2;
+      cell(sheet, 'A$r', text(value.name));
+      cell(sheet, 'B$r', text(value.currencyCode));
+      cell(
+        sheet,
+        'C$r',
+        DoubleCellValue(value.investedMinor / 100),
+        format: money,
+      );
+      cell(
+        sheet,
+        'D$r',
+        DoubleCellValue(value.currentMinor / 100),
+        format: money,
+      );
+      f(sheet, 'E$r', 'D$r-C$r', format: money);
+      f(sheet, 'F$r', 'IF(C$r=0,"",E$r/C$r)', format: '0.00%');
+      cell(sheet, 'G$r', date(value.valuedAt), format: 'dd/mm/yy');
+      cell(sheet, 'H$r', value.note.isEmpty ? null : text(value.note));
+    }
+    sheet.freezePanes(rows: 1);
+    sheet.setAutoFilter(at('A1'), at('H${items.length + 1}'));
+  }
+  if (data.investmentEntries.isNotEmpty) {
+    final sheet = base(t('รายการลงทุน', 'Investment entries'), [
+      18,
+      28,
+      14,
+      22,
+      22,
+      35,
+    ]);
+    headers(sheet, 1, 0, [
+      t('วันที่', 'Date'),
+      t('กองทุน', 'Fund'),
+      t('สกุลเงิน', 'Currency'),
+      t('เงินลงทุนเพิ่ม', 'Contribution'),
+      t('บัญชีที่ใช้ลงทุน', 'Funding account'),
+      t('หมายเหตุ', 'Note'),
+    ]);
+    final funds = {for (final fund in data.investments) fund.id: fund};
+    final entries =
+        data.investmentEntries
+            .where(
+              (e) =>
+                  data.options.years.contains(e.date.year) &&
+                  funds.containsKey(e.fundId) &&
+                  funds[e.fundId]!.currencyCode == data.options.currencyCode &&
+                  (data.options.accountId == null ||
+                      e.accountId == data.options.accountId) &&
+                  (data.options.categoryId == null ||
+                      data.options.categoryId == -1),
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i], fund = funds[entry.fundId]!, r = i + 2;
+      cell(sheet, 'A$r', date(entry.date), format: 'dd/mm/yy');
+      cell(sheet, 'B$r', text(fund.name));
+      cell(sheet, 'C$r', text(fund.currencyCode));
+      cell(
+        sheet,
+        'D$r',
+        DoubleCellValue(entry.amountMinor / 100),
+        format: money,
+        fill: yellow,
+      );
+      cell(
+        sheet,
+        'E$r',
+        text(data.accountNames[entry.accountId] ?? t('ไม่ระบุ', 'Unknown')),
+      );
+      cell(sheet, 'F$r', entry.note.isEmpty ? null : text(entry.note));
+    }
+    sheet.freezePanes(rows: 1);
+    sheet.setAutoFilter(at('A1'), at('F${entries.length + 1}'));
+  }
+  final investmentSummary = base(t('สรุปลงทุน', 'Investment summary'), [
+    24,
+    22,
+    26,
+    16,
+  ]);
+  cell(
+    investmentSummary,
+    'A1',
+    text(t('เดือนที่เลือก', 'Selected month')),
+    bold: true,
+  );
+  cell(
+    investmentSummary,
+    'B1',
+    date(data.investmentMonth),
+    format: 'mmmm yyyy',
+  );
+  cell(
+    investmentSummary,
+    'A3',
+    text(t('จำนวนกองทุน', 'Number of funds')),
+    bold: true,
+  );
+  cell(investmentSummary, 'B3', IntCellValue(data.fundCount));
+  cell(
+    investmentSummary,
+    'A4',
+    text(t('เงินลงทุนเดือนนี้', 'Investment this month')),
+    bold: true,
+  );
+  cell(
+    investmentSummary,
+    'B4',
+    DoubleCellValue(data.investedInMonth(data.investmentMonth) / 100),
+    format: money,
+    fill: yellow,
+  );
+  cell(investmentSummary, 'A5', text(t('สกุลเงิน', 'Currency')));
+  cell(investmentSummary, 'B5', text(data.options.currencyCode));
+  headers(investmentSummary, 7, 0, [
+    t('เดือน', 'Month'),
+    t('จำนวนกองทุน', 'Number of funds'),
+    t('เงินลงทุนในเดือน', 'Monthly investment'),
+    t('สกุลเงิน', 'Currency'),
+  ]);
+  var investmentRow = 8;
+  for (final year in data.options.years) {
+    for (var month = 1; month <= 12; month++) {
+      final period = DateTime(year, month), r = investmentRow++;
+      cell(investmentSummary, 'A$r', date(period), format: 'mmmm yyyy');
+      cell(investmentSummary, 'B$r', IntCellValue(data.fundCount));
+      cell(
+        investmentSummary,
+        'C$r',
+        DoubleCellValue(data.investedInMonth(period) / 100),
+        format: money,
+        fill: yellow,
+      );
+      cell(investmentSummary, 'D$r', text(data.options.currencyCode));
+    }
+  }
+  investmentSummary.freezePanes(rows: 7);
   wb.recalculate();
   return Uint8List.fromList(wb.save()!);
 }

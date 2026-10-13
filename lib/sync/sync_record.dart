@@ -8,6 +8,8 @@ const syncTables = [
   'recurring_rules',
   'saving_goals',
   'bill_reminders',
+  'investments',
+  'investment_entries',
 ];
 String newSyncId() {
   final random = Random.secure();

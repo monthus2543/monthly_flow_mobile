@@ -1,3 +1,4 @@
+import '../widgets/app_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -43,7 +44,10 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         selectedMonth: ref.read(appStoreProvider).selectedMonth,
       ),
       entries: List.of(store.entries),
+      investments: List.of(store.investments),
+      investmentEntries: List.of(store.investmentEntries),
       categoryNames: {
+        -1: context.l10n.t('investments'),
         for (final c in store.categories) c.id: categoryLabel(context, c),
       },
       accountNames: {
@@ -199,7 +203,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                DropdownButtonFormField<int>(
+                AppDropdownFormField<int>(
                   key: ValueKey('export-account-$accountId'),
                   initialValue: accountId ?? -1,
                   isExpanded: true,
@@ -228,7 +232,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                       : (v) => setState(() => accountId = v == -1 ? null : v),
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<int>(
+                AppDropdownFormField<int>(
                   key: ValueKey('export-category-$categoryId'),
                   initialValue: categoryId ?? -1,
                   isExpanded: true,
@@ -408,6 +412,9 @@ class _ExcelPreviewScreenState extends ConsumerState<ExcelPreviewScreen> {
         year?.incomeMinor ?? years.fold<int>(0, (a, y) => a + y.incomeMinor);
     final expenseMinor =
         year?.expenseMinor ?? years.fold<int>(0, (a, y) => a + y.expenseMinor);
+    final investmentMinor =
+        year?.investmentMinor ??
+        years.fold<int>(0, (a, y) => a + y.investmentMinor);
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.t('export_preview'))),
       body: DecoratedBox(
@@ -443,10 +450,41 @@ class _ExcelPreviewScreenState extends ConsumerState<ExcelPreviewScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: Text(context.l10n.t('fund_count'))),
+                      Text('${widget.data.fundCount}'),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${context.l10n.t('monthly_invested')} (${monthLabel(context, widget.data.investmentMonth)})',
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          money(
+                            context,
+                            widget.data.investedInMonth(
+                              widget.data.investmentMonth,
+                            ),
+                          ),
+                          style: const TextStyle(color: AppColors.investment),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   for (final pair in [
                     ('income', incomeMinor),
                     ('expense', expenseMinor),
-                    ('export_net', incomeMinor - expenseMinor),
+                    (
+                      'export_net',
+                      incomeMinor - expenseMinor - investmentMinor,
+                    ),
                   ])
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -621,7 +659,9 @@ class _ExcelPreviewScreenState extends ConsumerState<ExcelPreviewScreen> {
                         trailing: Text(
                           money(context, e.amountMinor),
                           style: TextStyle(
-                            color: e.type == income
+                            color: e.type == investmentTransfer
+                                ? AppColors.investment
+                                : e.type == income
                                 ? AppColors.teal
                                 : AppColors.expense,
                           ),

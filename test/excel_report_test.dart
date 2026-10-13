@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:monthly_flow/export/excel_report.dart';
 import 'package:monthly_flow/models/finance_models.dart';
+import 'package:monthly_flow/models/investment.dart';
+import 'package:monthly_flow/models/investment_entry.dart';
 
 Entry entry(
   String title,
@@ -25,6 +27,101 @@ CellIndex at(String cell) => CellIndex.indexByString(cell);
 double number(Sheet sheet, String cell) =>
     double.parse(sheet.evaluate(at(cell)).toString());
 void main() {
+  test(
+    'investment summary uses selected month, currency and funding account',
+    () {
+      final funds = [
+        for (var id = 1; id <= 3; id++)
+          Investment(
+            id: id,
+            name: 'Fund $id',
+            investedMinor: 0,
+            currentMinor: 0,
+            currencyCode: id == 3 ? 'USD' : 'THB',
+            valuedAt: DateTime(2026),
+          ),
+      ];
+      final deposits = [
+        InvestmentEntry(
+          id: 1,
+          fundId: 1,
+          accountId: 1,
+          amountMinor: 1000,
+          currentMinor: 0,
+          contributionOnly: true,
+          date: DateTime(2026, 9, 1),
+          createdAt: 1,
+        ),
+        InvestmentEntry(
+          id: 2,
+          fundId: 1,
+          accountId: 1,
+          amountMinor: 2000,
+          currentMinor: 0,
+          contributionOnly: true,
+          date: DateTime(2026, 10, 1),
+          createdAt: 2,
+        ),
+        InvestmentEntry(
+          id: 3,
+          fundId: 2,
+          accountId: 2,
+          amountMinor: 3000,
+          currentMinor: 0,
+          contributionOnly: true,
+          date: DateTime(2026, 10, 2),
+          createdAt: 3,
+        ),
+        InvestmentEntry(
+          id: 4,
+          fundId: 3,
+          accountId: 1,
+          amountMinor: 7000,
+          currentMinor: 0,
+          contributionOnly: true,
+          date: DateTime(2026, 10, 3),
+          createdAt: 4,
+        ),
+      ];
+      ExcelReportData report([int? account]) => ExcelReportData(
+        options: ReportOptions(
+          years: [2026],
+          selectedMonth: DateTime(2026, 10),
+          accountId: account,
+          includeCharts: false,
+        ),
+        entries: [
+          for (final e in deposits)
+            Entry(
+              id: -e.id!,
+              title: 'Fund',
+              amountMinor: e.amountMinor,
+              type: investmentTransfer,
+              categoryId: -1,
+              accountId: e.accountId!,
+              date: e.date,
+              createdAt: e.createdAt,
+            ),
+        ],
+        categoryNames: {-1: 'ลงทุน'},
+        accountNames: {1: 'Cash', 2: 'Bank'},
+        investments: funds,
+        investmentEntries: deposits,
+      );
+      final data = report();
+      expect(data.fundCount, 2);
+      expect(data.investedInMonth(data.investmentMonth), 5000);
+      expect(report(1).investedInMonth(DateTime(2026, 10)), 2000);
+      final wb = Excel.decodeBytes(buildExcelReport(data));
+      expect(number(wb['สรุปลงทุน'], 'B3'), 2);
+      expect(number(wb['สรุปลงทุน'], 'B4'), 50);
+      expect(number(wb['สรุปลงทุน'], 'C16'), 10);
+      expect(number(wb['สรุปลงทุน'], 'C17'), 50);
+      expect(number(wb['2569'], 'C7'), 2);
+      expect(number(wb['2569'], 'R3'), 50);
+      expect(number(wb['2569'], 'C5'), -50);
+    },
+  );
   setUpAll(() => initializeDateFormatting('th'));
   final entries = [
     entry('เงินเดือน', 2400050, income, DateTime(2024, 1, 1)),
@@ -65,12 +162,13 @@ void main() {
         'สรุป 2568',
         'ลงทุน 2568',
         'ข้อมูล 2568',
+        'สรุปลงทุน',
       ]);
       final s = wb['2567'];
       expect(s.cell(at('D1')).value, TextCellValue('รายรับ'));
       expect(s.cell(at('J1')).value, TextCellValue('ค่าใช้จ่าย'));
       expect(s.cell(at('F18')).value, DoubleCellValue(24000.5));
-      expect(s.cell(at('J18')).displayText, '29/02/2024');
+      expect(s.cell(at('J18')).displayText, '29/02/24');
       expect(number(s, 'Y30'), 24000.5);
       expect(number(s, 'Z30'), 123.95);
       expect(number(s, 'C5'), -123.45);

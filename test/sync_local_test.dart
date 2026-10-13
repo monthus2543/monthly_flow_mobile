@@ -146,7 +146,7 @@ void main() {
     await dbA.setVersion(6);
     await a.close();
     dbA = await a.open();
-    expect(await dbA.getVersion(), 7);
+    expect(await dbA.getVersion(), 11);
     expect((await FinanceRepository(dbA).entries()).single.title, 'Preserved entry');
     expect((await FinanceRepository(dbA).categories()).every((c) => c.colorValue == null), isTrue);
     await FinanceRepository(dbA).saveCategory(const Category(0, 'New color', income, 'other', colorValue: 0xff123456));

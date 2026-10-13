@@ -9,10 +9,20 @@ class WalletBalanceCard extends StatelessWidget {
     required this.incomeMinor,
     required this.expenseMinor,
     this.hideBalances = false,
+    this.investmentMode = false,
+    this.fundCount = 0,
+    this.monthlyInvestedMinor = 0,
+    this.currentMinor = 0,
+    this.cashInvestmentMinor = 0,
+    this.onToggleMode,
   });
   final int incomeMinor;
   final int expenseMinor;
   final bool hideBalances;
+  final bool investmentMode;
+  final int fundCount, monthlyInvestedMinor, currentMinor;
+  final int cashInvestmentMinor;
+  final VoidCallback? onToggleMode;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +43,12 @@ class WalletBalanceCard extends StatelessWidget {
       tone(24, dark ? .3 : .85),
     ];
     String amount(int minor) => hideBalances ? '******' : money(context, minor);
-    Widget metric(String label, int value, Color color) => Expanded(
+    Widget metric(
+      String label,
+      int value,
+      Color color, {
+      bool isMoney = true,
+    }) => Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -48,7 +63,7 @@ class WalletBalanceCard extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                amount(value),
+                isMoney ? amount(value) : value.toString(),
                 style: TextStyle(
                   color: color,
                   fontSize: 17,
@@ -87,9 +102,20 @@ class WalletBalanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.l10n.t('monthly_balance'),
-                      style: TextStyle(color: foreground.withValues(alpha: .8)),
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: onToggleMode == null ? 0 : 40,
+                      ),
+                      child: Text(
+                        context.l10n.t(
+                          investmentMode
+                              ? 'portfolio_value'
+                              : 'monthly_balance',
+                        ),
+                        style: TextStyle(
+                          color: foreground.withValues(alpha: .8),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     SizedBox(
@@ -98,7 +124,13 @@ class WalletBalanceCard extends StatelessWidget {
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          amount(incomeMinor - expenseMinor),
+                          amount(
+                            investmentMode
+                                ? currentMinor
+                                : incomeMinor -
+                                      expenseMinor -
+                                      cashInvestmentMinor,
+                          ),
                           style: TextStyle(
                             color: foreground,
                             fontSize: 31,
@@ -138,17 +170,26 @@ class WalletBalanceCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             metric(
-                              context.l10n.t('income'),
-                              incomeMinor,
+                              context.l10n.t(
+                                investmentMode ? 'fund_count' : 'income',
+                              ),
+                              investmentMode ? fundCount : incomeMinor,
                               dark
                                   ? AppColors.tealDark
                                   : AppColors.categoryIncome,
+                              isMoney: !investmentMode,
                             ),
                             const SizedBox(width: 16),
                             metric(
-                              context.l10n.t('expense'),
-                              expenseMinor,
-                              dark
+                              context.l10n.t(
+                                investmentMode ? 'monthly_invested' : 'expense',
+                              ),
+                              investmentMode
+                                  ? monthlyInvestedMinor
+                                  : expenseMinor,
+                              investmentMode
+                                  ? AppColors.investment
+                                  : dark
                                   ? AppColors.errorDark
                                   : AppColors.categoryExpense,
                             ),
@@ -161,6 +202,23 @@ class WalletBalanceCard extends StatelessWidget {
               ),
             ],
           ),
+          if (onToggleMode != null)
+            Positioned(
+              right: 8,
+              top: 4,
+              child: IconButton(
+                tooltip: context.l10n.t(
+                  investmentMode ? 'spending_mode' : 'investments',
+                ),
+                onPressed: onToggleMode,
+                icon: Icon(
+                  investmentMode
+                      ? Icons.account_balance_wallet_outlined
+                      : Icons.trending_up_rounded,
+                ),
+                color: foreground,
+              ),
+            ),
           Positioned(
             right: -4,
             bottom: 18,
