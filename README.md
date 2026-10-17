@@ -176,6 +176,10 @@ build/app/outputs/bundle/release/app-release.aab
 
 > ปัจจุบัน `android/app/build.gradle` ใช้ debug signing สำหรับ release build เพื่อให้ build ทดสอบได้ทันที ก่อนอัปโหลด Google Play ต้องสร้าง release keystore และเปลี่ยน `signingConfig` ตามคู่มือ [Sign the app](https://docs.flutter.dev/deployment/android#sign-the-app)
 
+GitHub Actions ใช้คีย์ทดสอบเดิมจาก repository secret `ANDROID_DEBUG_KEYSTORE_BASE64` โดยตรวจ SHA-1 ให้ตรงกับที่ลงทะเบียนใน Firebase ก่อน build ทั้ง debug และ release หากไม่มี secret จะหยุด build แทนการสร้างคีย์ใหม่ที่ Google Login ไม่รู้จัก ห้ามใส่ไฟล์ keystore หรือค่า secret ลงใน Git
+
+หาก Google Login ใช้ได้ในเครื่องแต่ใช้ไม่ได้ใน APK จาก GitHub ให้ตรวจลายเซ็นของ **APK ที่ติดตั้งจริง** ด้วย `apksigner verify --print-certs` แล้วเทียบกับ Firebase > Project settings > Android app > SHA certificate fingerprints การเพิ่ม SHA ของ APK เดิมใน Firebase ไม่ต้องลบข้อมูลหรือติดตั้งแอปใหม่
+
 เมื่อต่อโทรศัพท์ผ่าน USB สามารถติดตั้งแอปด้วย:
 
 ```bash

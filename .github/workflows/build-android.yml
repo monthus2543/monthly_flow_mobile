@@ -50,6 +50,26 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Keep the certificate registered in Firebase stable across hosted runners.
+      - name: Restore Android signing key
+        shell: bash
+        env:
+          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$ANDROID_DEBUG_KEYSTORE_BASE64" ]; then
+            echo "::error::Missing ANDROID_DEBUG_KEYSTORE_BASE64; refusing to generate an unregistered signing key."
+            exit 1
+          fi
+          mkdir -p "$HOME/.android"
+          umask 077
+          printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$HOME/.android/debug.keystore"
+          SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -alias androiddebugkey -storepass android -keypass android | sed -n 's/.*SHA1: //p' | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')
+          if [ "$SHA1" != "b26aba0a05ee978fe7ddeb9adafd7e6435cb7b40" ]; then
+            echo "::error::Android signing certificate does not match the key registered in Firebase."
+            exit 1
+          fi
+
       - name: Analyze source
         run: flutter analyze
 
