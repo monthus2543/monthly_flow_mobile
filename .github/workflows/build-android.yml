@@ -69,6 +69,7 @@ jobs:
             echo "::error::Android signing certificate does not match the key registered in Firebase."
             exit 1
           fi
+          echo "ANDROID_DEBUG_KEYSTORE_PATH=$HOME/.android/debug.keystore" >> "$GITHUB_ENV"
 
       - name: Analyze source
         run: flutter analyze
@@ -105,6 +106,19 @@ jobs:
             exit 1
           fi
           cp "$SOURCE" "$TARGET"
+
+      - name: Verify APK signing certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          CERTS=$("$APKSIGNER" verify --print-certs "build/app/outputs/flutter-apk/monthly-flow-${{ steps.app.outputs.mode }}-${{ steps.app.outputs.version }}.apk")
+          printf '%s\n' "$CERTS"
+          SHA1=$(printf '%s\n' "$CERTS" | sed -n 's/^Signer #1 certificate SHA-1 digest: //p')
+          if [ "$SHA1" != "b26aba0a05ee978fe7ddeb9adafd7e6435cb7b40" ]; then
+            echo "::error::APK signing certificate is not registered in Firebase."
+            exit 1
+          fi
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4

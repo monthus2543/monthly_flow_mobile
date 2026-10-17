@@ -26,6 +26,16 @@ android {
         versionName flutter.versionName
     }
 
+    signingConfigs {
+        debug {
+            // Hosted runners must use the same Firebase-registered certificate.
+            def ciKeystorePath = System.getenv('ANDROID_DEBUG_KEYSTORE_PATH')
+            if (ciKeystorePath) {
+                storeFile file(ciKeystorePath)
+            }
+        }
+    }
+
     buildTypes {
         release {
             signingConfig signingConfigs.debug
